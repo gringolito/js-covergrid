@@ -1,6 +1,6 @@
 'use strict'
 
-// Writes ghes/action.yml, the GitHub Enterprise Server variant of action.yml (ADR-0007).
+// Writes ghes/action.yml, the GitHub Enterprise Server variant of action.yml (ADR-0009).
 //
 // GHES runs only actions/upload-artifact@v3, so the variant is action.yml with that one
 // step repinned and every shipped path reached one directory up. It is generated so the two
@@ -23,7 +23,7 @@ const ARTIFACT_ACTION = /^(\s*(?:-\s+)?)uses: actions\/(upload|download)-artifac
 
 const HEADER = [
   '# GENERATED from action.yml by scripts/build-ghes-action.js. Do not edit by hand.',
-  '# The GitHub Enterprise Server variant of js-covergrid (ADR-0007).',
+  '# The GitHub Enterprise Server variant of js-covergrid (ADR-0009).',
   '',
 ].join('\n')
 

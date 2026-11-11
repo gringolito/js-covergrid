@@ -2,7 +2,7 @@
 
 // Which pull request, if any, this run belongs to.
 //
-// `@actions/github` would hand over a parsed context; with no dependencies (ADR-0003) the
+// `@actions/github` would hand over a parsed context; with no dependencies (ADR-0006) the
 // event payload is read from `$GITHUB_EVENT_PATH` instead.
 
 const fs = require('node:fs')

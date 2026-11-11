@@ -2,7 +2,7 @@
 
 // The slice of the GitHub REST API this action needs, over the global `fetch` that ships
 // with Node. `@actions/github` and Octokit are npm packages, and there are no runtime
-// dependencies (ADR-0003).
+// dependencies (ADR-0006).
 //
 // `fetchImpl` is injectable so every request this builds can be asserted offline.
 

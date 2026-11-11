@@ -1,16 +1,14 @@
 # Ship a GitHub Enterprise Server variant as a generated subdirectory action
 
-Amends the upload host in [ADR-0006](./0006-github-user-attachments.md).
-
 GitHub Enterprise Server (GHES) runs the artifact actions only at v3. The main action stays on the
-latest. GHES users take `gringolito/go-covergrid/ghes@v1`, which differs in one pinned step.
+latest. GHES users take `gringolito/js-covergrid/ghes@v1`, which differs in one pinned step.
 
 ## Decision
 
 **The Baseline is fetched over REST on both platforms.** `download-artifact@v3` can't read another
 run's artifacts, and the Baseline always comes from one. `src/fetch-baseline.js` lists the run's
 artifacts, downloads the zip, and follows the storage redirect without the token. `src/zip.js`
-extracts the file with `zlib`, which keeps [ADR-0003](./0003-composite-action-zero-dependencies.md)
+extracts the file with `zlib`, which keeps [ADR-0006](./0006-composite-action-zero-dependencies.md)
 and doesn't depend on `unzip`.
 
 **The upload stays an action.** `run:` steps don't get `ACTIONS_RUNTIME_TOKEN`, so the upload can't
@@ -25,9 +23,8 @@ repins the upload and reaches shipped files through `${GITHUB_ACTION_PATH}/../`.
 security backport of its dependencies for GHES, but older instances may not bundle it. The step
 uploads one file this action wrote, so we take compatibility over the backport.
 
-**The Grid Map upload follows the server.** If the API is `api.<server host>` (github.com, GHE.com),
-the upload goes to `uploads.<server host>`. Otherwise it goes to `<server>/api/uploads`. Only asset
-URLs on the server's host are accepted.
+**The Grid Map upload follows the server.** The upload and asset hosts are derived from
+`GITHUB_API_URL` and `GITHUB_SERVER_URL`, as [ADR-0008](./0008-github-user-attachments.md) describes.
 
 ## Rejected
 
@@ -42,10 +39,12 @@ URLs on the server's host are accepted.
 
 ## Consequences
 
-- Dependabot doesn't scan `ghes/`, so it never bumps the v3 pin. Its PRs that touch `action.yml` fail
-  CI until someone runs `node scripts/build-ghes-action.js`.
+- Dependabot scans `/` and `/ghes` in one multi-ecosystem group, so a bump to an action both files use
+  lands in one pull request. In `ghes/` it ignores `actions/upload-artifact`, whose pin the generator
+  owns. A pull request that changes `action.yml` still fails CI until someone runs
+  `node scripts/build-ghes-action.js`.
 - GHES doesn't accept token uploads of user attachments (`gh` refuses `--attach` on enterprise hosts),
   so on GHES the comment is posted without the picture. The upload is still attempted, in case a later
   release adds the endpoint.
-- GHES runners need Linux with Docker and egress to `ghcr.io` for the Coverage Gate, and `node` on
-  `PATH`. The instance needs GitHub Connect or actions-sync.
+- GHES runners need `node` on `PATH`. The instance needs GitHub Connect or actions-sync to fetch this
+  action.

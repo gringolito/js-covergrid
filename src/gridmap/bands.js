@@ -5,7 +5,7 @@
 //
 // The boundaries are conventional and not configurable. They are not fitted
 // to any repository's distribution: a project whose Packages all reach the top Band should
-// render as a solid block of green, because that is the true picture (ADR-0004).
+// render as a solid block of green, because that is the true picture (ADR-0005).
 
 /** Upper boundaries of the first four Bands, in percent. */
 const CUTS = [50, 70, 85, 95]

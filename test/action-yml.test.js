@@ -3,7 +3,7 @@
 // Guards the composite-action constraints that only bite at run time on a real runner:
 // a missing `shell:`, a step id that no longer exists, a path that ships nowhere, a
 // `post:` hook composite actions do not have. No YAML parser is available (zero runtime
-// dependencies, ADR-0003), so this scans the structure by indentation. Crude, and enough.
+// dependencies, ADR-0006), so this scans the structure by indentation. Crude, and enough.
 
 const test = require('node:test')
 const assert = require('node:assert')
@@ -35,7 +35,7 @@ test('it declares itself a composite action', () => {
   assert.match(TEXT, /^ {2}using: composite$/m)
 })
 
-// Composite actions have no cleanup hook, so nothing may rely on teardown (ADR-0003).
+// Composite actions have no cleanup hook, so nothing may rely on teardown (ADR-0006).
 test('there is no post hook, because composite actions do not have one', () => {
   assert.ok(!/^ {2}post:/m.test(TEXT))
   assert.ok(!/^ {2}post-if:/m.test(TEXT))
@@ -82,7 +82,7 @@ test('every referenced input is declared', () => {
 })
 
 // The working directory belongs to the consumer's checkout, so shipped files are only
-// reachable through $GITHUB_ACTION_PATH (ADR-0003).
+// reachable through $GITHUB_ACTION_PATH (ADR-0006).
 test('every shipped file reached through GITHUB_ACTION_PATH exists', () => {
   const referenced = [...TEXT.matchAll(/\$\{?GITHUB_ACTION_PATH\}?\/([A-Za-z0-9_./-]+)/g)].map((m) => m[1])
   assert.ok(referenced.length >= 3, 'expected the action to invoke shipped scripts')

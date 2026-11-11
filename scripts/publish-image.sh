@@ -2,7 +2,7 @@
 # Uploads the Grid Map SVG as a GitHub user attachment and writes `url` to $GITHUB_OUTPUT.
 #
 # The upload endpoint takes only a token that belongs to a person with write access to the
-# repository. GITHUB_TOKEN and GitHub App installation tokens get a 404 (ADR-0006).
+# repository. GITHUB_TOKEN and GitHub App installation tokens get a 404 (ADR-0008).
 
 set -uo pipefail
 

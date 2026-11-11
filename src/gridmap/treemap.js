@@ -5,7 +5,7 @@
 //
 // Flat is a decision, not a simplification: a Package is everything before the last `/`
 // with no rollup, so `internal/tariff` and `internal/tariff/courier` are unrelated
-// neighbours (ADR-0004).
+// neighbours (ADR-0005).
 
 /**
  * @template {{ total: number }} T

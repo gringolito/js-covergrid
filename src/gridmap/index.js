@@ -3,7 +3,7 @@
 // Grid Map rendering: Breakdown File statistics in, an SVG document out.
 //
 // Pure by construction: no network, no GitHub API, no filesystem. Uploading lives in its
-// own script so this stays testable without reaching the host (ADR-0002).
+// own script so this stays testable without reaching the host (ADR-0007).
 
 const { aggregateByPackage, totalStats, coverageRatio } = require('../breakdown.js')
 const { escapeText, tag, document, wellFormed } = require('./svg.js')
@@ -12,7 +12,7 @@ const { squarify } = require('./treemap.js')
 
 /**
  * GitHub's comment content column. The coordinate space is the display width, so a
- * font-size in this file is the size the reader sees (ADR-0004).
+ * font-size in this file is the size the reader sees (ADR-0005).
  */
 const CANVAS_WIDTH = 962
 const BASE_HEIGHT = 541
@@ -50,7 +50,7 @@ const textWidth = (s, size) => s.length * size * ADVANCE_RATIO
 
 /**
  * Height grows with Package count: the width is fixed to the display column, so height is
- * the only way left to give every Tile more area (ADR-0004).
+ * the only way left to give every Tile more area (ADR-0005).
  *
  * @param {number} packageCount
  * @returns {number}
@@ -168,7 +168,7 @@ function drawTile(tile, index, prefix) {
 
   // Full path if it fits, else the last segment, else no name at all. A Tile too small to
   // label stays a bare colour chip, which is fine: it is small because it holds few
-  // Statements, so the layout has already ranked it (ADR-0004).
+  // Statements, so the layout has already ranked it (ADR-0005).
   let name = ''
   if (h > NAME_MIN_TILE_H) {
     if (textWidth(short, NAME_SIZE) <= inner) name = short

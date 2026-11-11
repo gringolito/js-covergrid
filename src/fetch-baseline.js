@@ -7,7 +7,7 @@
 // `path`, because losing the comparison is better than failing the job.
 //
 // This goes through the REST API rather than actions/download-artifact: GitHub Enterprise
-// Server only runs download-artifact@v3, which cannot read another run's artifacts (ADR-0007).
+// Server only runs download-artifact@v3, which cannot read another run's artifacts (ADR-0009).
 
 const fs = require('node:fs')
 const path = require('node:path')

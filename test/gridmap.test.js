@@ -23,7 +23,7 @@ const fixture = (name) => parseBreakdown(fs.readFileSync(path.join(FIXTURES, nam
 
 const texts = (svg) => [...svg.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)].map((m) => ({ attrs: m[1], body: m[2] }))
 
-// ADR-0004: the coordinate space is GitHub's comment content width, so a font-size in this
+// ADR-0005: the coordinate space is GitHub's comment content width, so a font-size in this
 // source is the size the reader sees.
 test('the canvas width is GitHub comment width, not an arbitrary larger number', () => {
   assert.strictEqual(CANVAS_WIDTH, 962)
@@ -175,7 +175,7 @@ test('a package name containing markup is escaped in the output', () => {
   assert.deepStrictEqual(wellFormed(svg), { ok: true })
 })
 
-// ADR-0004 keeps this: a Tile too small to label is a bare colour chip, not an aggregate.
+// ADR-0005 keeps this: a Tile too small to label is a bare colour chip, not an aggregate.
 test('the smallest tiles are colour chips and the biggest carry a percentage', () => {
   const { svg, tiles } = renderGridMap({ stats: fixture('big-breakdown.txt') })
   const labelled = texts(svg).length
@@ -183,10 +183,10 @@ test('the smallest tiles are colour chips and the biggest carry a percentage', (
   assert.ok(labelled > tiles.length, 'most tiles should carry at least a percentage')
 })
 
-// ADR-0004 quotes these counts as its evidence that the layout labels what matters. They
+// ADR-0005 quotes these counts as its evidence that the layout labels what matters. They
 // move whenever the canvas width, a font size or a padding does, so they are asserted here:
 // the ADR's figures are only trustworthy while something checks them.
-test('the sample fixture labels the number of packages ADR-0004 claims', () => {
+test('the sample fixture labels the number of packages ADR-0005 claims', () => {
   const stats = fixture('sample-breakdown.txt')
   const { svg, tiles } = renderGridMap({ stats })
   const prefix = commonPathPrefix(tiles.map((t) => t.name))
@@ -208,7 +208,7 @@ test('the sample fixture labels the number of packages ADR-0004 claims', () => {
   assert.strictEqual(percentages, tiles.length, 'every tile carries its coverage ratio')
 })
 
-test('the 120-package fixture gets a percentage onto the count ADR-0004 claims', () => {
+test('the 120-package fixture gets a percentage onto the count ADR-0005 claims', () => {
   const { svg, tiles } = renderGridMap({ stats: fixture('big-breakdown.txt') })
   assert.strictEqual(tiles.length, 120)
   const percentages = texts(svg).filter((t) => /^\d+\.\d%$/.test(t.body)).length

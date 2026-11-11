@@ -1,6 +1,6 @@
 'use strict'
 
-// SVG as string building, which needs no library (ADR-0003).
+// SVG as string building, which needs no library (ADR-0006).
 //
 // Presentation attributes only: no <style>, no CSS, no <script>, nothing fetched from
 // another host. The file is rendered inside an <img>, where scripts do not run and external

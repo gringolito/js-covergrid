@@ -14,7 +14,7 @@ updates:
     patterns: ["*"]
     multi-ecosystem-group: "actions"
 
-  # GHES only runs upload-artifact v3 (ADR-0007); its pin lives in scripts/build-ghes-action.js.
+  # GHES only runs upload-artifact v3 (ADR-0009); its pin lives in scripts/build-ghes-action.js.
   - package-ecosystem: "github-actions"
     directory: "/ghes"
     patterns: ["*"]

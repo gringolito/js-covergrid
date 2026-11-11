@@ -5,8 +5,10 @@ with area proportional to Statement count and no nesting. Squarified layout give
 and no slivers, so every Tile can fit its label or Coverage Ratio. We rejected slice-and-dice, because
 large Statement spreads turn it into ribbons too thin to label.
 
-Nested treemaps exist elsewhere. This layout is flat because the Coverage Gate defines a Package as the
-path before the last `/`, with no rollup, and the Grid Map follows that definition.
+Nested treemaps exist elsewhere. This layout is flat because a Package is the directory of a file, the
+path before the last `/`, with no rollup, and the Grid Map follows that definition. The dirname is
+predictable and matches the folders users see. The optional `package-depth` input folds deep trees into fewer Packages without nesting. See
+[ADR-0004](./0004-package-is-the-directory.md).
 
 The coordinate space is 962px, matches GitHub's comment column width, and is not configurable. The
 height grows with Package count and is capped, so the image never becomes a ribbon that needs scrolling.
@@ -34,8 +36,8 @@ Small Tiles stay bare colour chips. We don't merge them into an "other" Tile. A 
 Statements, so the layout already gives the space to what matters more.
 
 In a flat treemap, nested packages are unrelated neighbours, and a parent's Statements exclude its
-children's. Readers may expect nesting. This follows the Package definition from the Coverage Gate. See
-[ADR-0001](./0001-read-breakdown-files-not-the-profile.md).
+children's. Readers may expect nesting. This follows the Package definition in
+[ADR-0004](./0004-package-is-the-directory.md).
 
 Labels use monospace fonts. The layout must know a string's width before it decides what fits. A fixed
 advance makes that arithmetic exact, and `textLength` pins the width in any other font.

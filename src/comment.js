@@ -4,7 +4,7 @@
 // filesystem, no network. The whole comment can be diffed in tests.
 //
 // Counts are Statements, as the coverage tool counts them, and CONTEXT.md bans "line".
-// There is no verdict here: thresholds belong to the test tool.
+// There is no verdict here: thresholds belong to the test tool (ADR-0003).
 
 const {
   aggregateByPackage,

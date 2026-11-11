@@ -3,7 +3,7 @@
 // Entry point: build the comment body and upsert it on the pull request.
 //
 // It neither renders nor uploads: the Grid Map arrives as an already published
-// `IMAGE_URL` (ADR-0005).
+// `IMAGE_URL` (ADR-0007).
 
 const fs = require('node:fs')
 

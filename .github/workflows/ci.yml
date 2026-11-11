@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      # No install step: there are no dependencies and no lockfile (ADR-0003).
+      # No install step: there are no dependencies and no lockfile (ADR-0006).
       - run: node --test test/*.test.js
 
   example-grid-map:

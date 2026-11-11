@@ -87,7 +87,7 @@ test('offsets are honoured so the layout can be inset', () => {
   )
 })
 
-// ADR-0004 quotes these aspect-ratio ranges as its case for squarified over slice-and-dice.
+// ADR-0005 quotes these aspect-ratio ranges as its case for squarified over slice-and-dice.
 // Dimensions come from the renderer's own constants: a hardcoded copy would keep passing
 // after the canvas changed, while the ADR it guards went stale.
 test('the 18 sample packages produce no slivers', () => {
@@ -96,7 +96,7 @@ test('the 18 sample packages produce no slivers', () => {
   const ratios = out.map(aspect)
   assert.ok(Math.min(...ratios) >= 1, 'an aspect ratio below 1 means the max() is inverted')
   const worst = Math.max(...ratios)
-  assert.ok(worst < 1.9, `worst aspect ratio ${worst.toFixed(2)}, ADR-0004 claims under 1.82`)
+  assert.ok(worst < 1.9, `worst aspect ratio ${worst.toFixed(2)}, ADR-0005 claims under 1.82`)
 })
 
 test('120 packages still produce usable aspect ratios', () => {

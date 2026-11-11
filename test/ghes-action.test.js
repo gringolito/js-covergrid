@@ -1,6 +1,6 @@
 'use strict'
 
-// ghes/action.yml is a build product of action.yml (ADR-0007); the GHES action workflow fails
+// ghes/action.yml is a build product of action.yml (ADR-0009); the GHES action workflow fails
 // a pull request whose committed copy is stale. These check what the generator makes of the
 // current action.yml: no artifact action GitHub Enterprise Server cannot run, and no shipped
 // file reached from inside ghes/.

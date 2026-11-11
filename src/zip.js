@@ -1,7 +1,7 @@
 'use strict'
 
 // Reads the one file out of an artifact archive. The REST API serves every artifact as a
-// zip, and there are no runtime dependencies (ADR-0003) and no promise that a self-hosted
+// zip, and there are no runtime dependencies (ADR-0006) and no promise that a self-hosted
 // runner has `unzip`, so this reads the central directory itself.
 //
 // Only what artifact archives contain is supported: stored or deflated entries, no

@@ -2,7 +2,7 @@
 
 // The real upload needs a personal token and reaches GitHub, so `curl` is replaced with a shim
 // on PATH that records what it was handed (arguments and stdin) and answers with whatever the
-// test wants. Whether GitHub itself still behaves as measured is for CI to say (ADR-0006).
+// test wants. Whether GitHub itself still behaves as measured is for CI to say (ADR-0008).
 
 const test = require('node:test')
 const assert = require('node:assert')
