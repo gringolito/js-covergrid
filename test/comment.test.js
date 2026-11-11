@@ -142,6 +142,18 @@ test('a run with nothing changed says so instead of showing empty tables', () =>
   assert.ok(!body.includes('Impacted packages'))
 })
 
+// The current run adds a top-level folder, so its files alone share nothing while the
+// Baseline's share `web/src`. Counting each side from its own shared folder would compare
+// `web/src/ui` against `web/src/ui/Button` and flag an unchanged package as new.
+test('a package depth groups the baseline and the current run from the same folder', () => {
+  const base = [{ name: 'web/src/ui/Button/index.ts', total: 10, covered: 5 }]
+  const current = [...base, { name: 'tools/build.ts', total: 4, covered: 0 }]
+  const body = render({ current, base, depth: 2 })
+  const packages = body.slice(body.indexOf('### Impacted packages'))
+  assert.match(packages, /🆕 \| `tools` \|/)
+  assert.ok(!packages.includes('web/'), 'an unchanged package is not impacted')
+})
+
 test('the fallback comment explains that coverage data could not be read', () => {
   const body = renderUnavailableComment('coverage-breakdown.txt')
   assert.match(body, /could not be read/i)

@@ -34,28 +34,73 @@ function parseBreakdown(text) {
   return stats
 }
 
+function dirSegments(filename) {
+  const i = filename.lastIndexOf('/')
+  return i === -1 ? [] : filename.slice(0, i).split('/')
+}
+
 /**
- * A Package is everything before the last `/`, with no rollup of deeper paths into
- * shallower ones. Mirrors go-test-coverage's `packageForFile` so our Package names match
- * the names its own per-package threshold annotations use.
+ * The deepest folder every file sits under, '' when they share none.
  *
- * @param {string} filename
+ * @param {string[]} filenames
  * @returns {string}
  */
-function packageForFile(filename) {
+function sharedFolder(filenames) {
+  if (filenames.length === 0) return ''
+
+  let shared = dirSegments(filenames[0])
+  for (const name of filenames.slice(1)) {
+    const dir = dirSegments(name)
+    let i = 0
+    while (i < shared.length && i < dir.length && shared[i] === dir[i]) i++
+    shared = shared.slice(0, i)
+  }
+  return shared.join('/')
+}
+
+/**
+ * A Package is everything before the last `/`, with no rollup of deeper paths into
+ * shallower ones. A positive `depth` keeps the shared folder plus that many folders below
+ * it, so deeper folders fold into their ancestor at that depth.
+ *
+ * @param {string} filename
+ * @param {number} [depth] folders kept below `shared`; 0 for no limit
+ * @param {string} [shared] folder the depth counts from, see sharedFolder
+ * @returns {string}
+ */
+function packageForFile(filename, depth = 0, shared = '') {
   const i = filename.lastIndexOf('/')
-  return i === -1 ? filename : filename.slice(0, i)
+  if (i === -1) return filename
+
+  const dir = filename.slice(0, i)
+  if (depth === 0) return dir
+
+  const keep = (shared === '' ? 0 : shared.split('/').length) + depth
+  return dir.split('/').slice(0, keep).join('/')
+}
+
+/**
+ * @param {string | undefined} text the `package-depth` input
+ * @returns {number} 0 when unset
+ */
+function parsePackageDepth(text) {
+  const value = (text || '').trim()
+  if (value === '') return 0
+  if (!/^\d+$/.test(value)) throw new Error(`package-depth must be a whole number, got ${JSON.stringify(text)}`)
+  return parseInt(value, 10)
 }
 
 /**
  * @param {Stat[]} stats per-file entries
+ * @param {number} [depth] see packageForFile
+ * @param {string} [shared] see packageForFile; defaults to the folder `stats` share
  * @returns {Stat[]} one entry per Package, in first-seen order
  */
-function aggregateByPackage(stats) {
+function aggregateByPackage(stats, depth = 0, shared = sharedFolder(stats.map((s) => s.name))) {
   const byPkg = new Map()
 
   for (const s of stats) {
-    const name = packageForFile(s.name)
+    const name = packageForFile(s.name, depth, shared)
     const entry = byPkg.get(name) || { name, total: 0, covered: 0 }
     entry.total += s.total
     entry.covered += s.covered
@@ -147,6 +192,8 @@ function totalRatioDiff(current, base) {
 module.exports = {
   parseBreakdown,
   packageForFile,
+  sharedFolder,
+  parsePackageDepth,
   aggregateByPackage,
   totalStats,
   coverageRatio,

@@ -7,7 +7,7 @@
 
 const fs = require('node:fs')
 
-const { parseBreakdown } = require('./breakdown.js')
+const { parseBreakdown, parsePackageDepth } = require('./breakdown.js')
 const { MARKER, renderComment, renderUnavailableComment } = require('./comment.js')
 const { createClient } = require('./github.js')
 const { prNumberFrom, readContext } = require('./pr-context.js')
@@ -30,6 +30,7 @@ async function main() {
     CURRENT_BREAKDOWN_PATH,
     BASE_BREAKDOWN_PATH,
     IMAGE_URL,
+    PACKAGE_DEPTH,
   } = process.env
 
   const prNumber = prNumberFrom(readContext())
@@ -61,6 +62,7 @@ async function main() {
       base: base || [],
       prNumber,
       imageUrl: IMAGE_URL || null,
+      depth: parsePackageDepth(PACKAGE_DEPTH),
     })
   }
 

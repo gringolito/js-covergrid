@@ -113,10 +113,11 @@ function label(content, { x, y, size, fill, anchor, chars }) {
 /**
  * @param {object} options
  * @param {import('../breakdown.js').Stat[]} options.stats per-file Breakdown File entries
+ * @param {number} [options.depth] Package depth limit, see packageForFile
  * @returns {{ svg: string, tiles: object[], total: { total: number, covered: number, ratio: number } }}
  */
-function renderGridMap({ stats }) {
-  const packages = aggregateByPackage(stats)
+function renderGridMap({ stats, depth = 0 }) {
+  const packages = aggregateByPackage(stats, depth)
   const totals = totalStats(packages)
   const total = { ...totals, ratio: coverageRatio(totals.total, totals.covered) }
 

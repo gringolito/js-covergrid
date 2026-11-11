@@ -8,7 +8,7 @@
 
 const fs = require('node:fs')
 
-const { parseBreakdown } = require('./breakdown.js')
+const { parseBreakdown, parsePackageDepth } = require('./breakdown.js')
 const { renderGridMap } = require('./gridmap/index.js')
 const { setOutput, notice, warning } = require('./workflow.js')
 
@@ -22,7 +22,7 @@ function main() {
   }
 
   const stats = parseBreakdown(fs.readFileSync(breakdownPath, 'utf8'))
-  const { svg, tiles, total } = renderGridMap({ stats })
+  const { svg, tiles, total } = renderGridMap({ stats, depth: parsePackageDepth(process.env.PACKAGE_DEPTH) })
 
   if (tiles.length === 0) {
     warning('The breakdown file described no packages with statements; the grid map will be empty.')

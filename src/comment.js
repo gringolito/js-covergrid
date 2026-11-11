@@ -13,6 +13,7 @@
 
 const {
   aggregateByPackage,
+  sharedFolder,
   totalStats,
   coverageRatio,
   diffStats,
@@ -207,6 +208,7 @@ function gridMapSection(imageUrl) {
  * @param {import('./breakdown.js').Stat[]} args.base
  * @param {number | undefined} args.prNumber
  * @param {string | null} args.imageUrl published Grid Map URL, or null
+ * @param {number} [args.depth] Package depth limit, see packageForFile
  * @returns {string} markdown
  */
 function renderComment({
@@ -218,9 +220,12 @@ function renderComment({
   base,
   prNumber,
   imageUrl,
+  depth = 0,
 }) {
-  const currentPkgs = aggregateByPackage(current)
-  const basePkgs = aggregateByPackage(base)
+  // One shared folder for both sides, so a new top-level folder doesn't regroup the Baseline.
+  const shared = sharedFolder([...current, ...base].map((s) => s.name))
+  const currentPkgs = aggregateByPackage(current, depth, shared)
+  const basePkgs = aggregateByPackage(base, depth, shared)
   const impactedPkgs = diffStats(currentPkgs, basePkgs)
   const impactedFiles = diffStats(current, base)
 

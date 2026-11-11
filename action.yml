@@ -46,6 +46,14 @@ inputs:
       and GitHub App tokens are rejected.
     required: false
     default: ''
+  package-depth:
+    description: >-
+      Folders kept in a package name, counted from the deepest folder every file shares.
+      Files in deeper folders count towards their ancestor at this depth: when every file is
+      under app/, 2 turns app/src/components/Button/index.tsx into app/src/components. 0 keeps
+      every folder as its own package.
+    required: false
+    default: '0'
   fail-on-gate:
     description: Fail the job when the coverage gate fails. The comment is posted either way.
     required: false
@@ -130,6 +138,7 @@ runs:
       env:
         BREAKDOWN_PATH: ${{ steps.prepare.outputs.breakdown }}
         OUTPUT_PATH: ${{ steps.prepare.outputs.grid-map }}
+        PACKAGE_DEPTH: ${{ inputs.package-depth }}
       run: |
         set -euo pipefail
         if [[ ! -f "$BREAKDOWN_PATH" ]]; then
@@ -159,6 +168,7 @@ runs:
         CURRENT_BREAKDOWN_PATH: ${{ steps.prepare.outputs.breakdown }}
         BASE_BREAKDOWN_PATH: ${{ steps.baseline.outputs.path }}
         IMAGE_URL: ${{ steps.publish.outputs.url }}
+        PACKAGE_DEPTH: ${{ inputs.package-depth }}
       run: node "${GITHUB_ACTION_PATH}/src/post-comment.js"
 
     - name: Fail on a failed gate
