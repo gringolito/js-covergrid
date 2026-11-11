@@ -2,18 +2,15 @@
 
 // Breakdown File parsing and aggregation.
 //
-// A Breakdown File is vladopajic/go-test-coverage's machine-readable output: one line
-// per Go source file, `path;totalStatements;coveredStatements`. It is the single source
-// of every number this action reports. Nothing here parses a Coverage Profile. See
-// docs/adr/0001-read-breakdown-files-not-the-profile.md for why.
-//
-// The Gate's `report` output is human-formatted prose and must never be parsed.
+// A Breakdown File has one line per source file, `path;totalStatements;coveredStatements`.
+// src/convert-summary.js writes it from the Coverage Summary, and it is the single source of
+// every number this action reports (ADR-0001).
 
 /** @typedef {{ name: string, total: number, covered: number }} Stat */
 
 /**
  * @param {string} text contents of a Breakdown File
- * @returns {Stat[]} one entry per Go source file, in file order
+ * @returns {Stat[]} one entry per source file, in file order
  */
 function parseBreakdown(text) {
   const stats = []
@@ -123,7 +120,7 @@ function totalStats(list) {
 
 /**
  * Coverage Ratio as a percentage. Special-cased at the ends so a fully covered Package
- * reads exactly 100 rather than 99.99999999, matching go-test-coverage.
+ * reads exactly 100 rather than 99.99999999.
  *
  * @param {number} total
  * @param {number} covered
@@ -147,9 +144,8 @@ function round2(n) {
  * Entries whose uncovered Statement count moved since the Baseline, or that the Baseline
  * did not have at all.
  *
- * Mirrors go-test-coverage's `calculateStatsDiff`, including its quirk: an entry that is
- * now fully covered is excluded even if it previously had uncovered Statements. That is
- * upstream behaviour, replicated so our numbers agree with the Gate's.
+ * An entry that is now fully covered is left out, even if it had uncovered Statements
+ * before: the impacted tables point at what still needs work, and the total shows the gain.
  *
  * @param {Stat[]} current
  * @param {Stat[]} base
@@ -175,9 +171,7 @@ function diffStats(current, base) {
 }
 
 /**
- * Current total Coverage Ratio minus the Baseline's, to two decimals. Computed this way
- * so the number the comment shows matches the number the Gate's own diff threshold
- * compares against (`TotalPercentageDiff` upstream).
+ * Current total Coverage Ratio minus the Baseline's, to two decimals.
  *
  * @param {Stat[]} current
  * @param {Stat[]} base

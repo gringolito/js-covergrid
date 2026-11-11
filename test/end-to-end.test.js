@@ -292,9 +292,7 @@ test('the comment is created on a pull request, carrying the published grid map'
         GITHUB_API_URL: api.url,
         GITHUB_EVENT_NAME: 'pull_request',
         GITHUB_EVENT_PATH: eventFile(ws.dir, { pull_request: { number: 31 } }),
-        COVERAGE_OUTCOME: 'success',
         HAS_BASELINE: 'false',
-        DIFF_THRESHOLD: '-1',
         BASE_BRANCH: 'main',
         CURRENT_BREAKDOWN_PATH: path.join(FIXTURES, 'sample-breakdown.txt'),
         BASE_BREAKDOWN_PATH: path.join(ws.dir, 'missing.txt'),
@@ -304,8 +302,7 @@ test('the comment is created on a pull request, carrying the published grid map'
     )
 
     const posted = JSON.parse(api.requests[1].body).body
-    assert.match(posted, /^<!-- go-covergrid:grid-map -->/)
-    assert.match(posted, /✅ \*\*Coverage gate passed\*\*/)
+    assert.match(posted, /^<!-- js-covergrid:grid-map -->/)
     assert.match(posted, /\*\*Total coverage:\*\* .* 76\.8%/)
     assert.match(posted, /!\[Coverage Grid Map\]\(https:\/\/github\.com\/user-attachments\/assets\/zzz999\)/)
     assert.ok(!posted.includes('Coverage Diff'), 'no baseline means no diff summary')
@@ -324,7 +321,7 @@ test('a second run edits the existing comment instead of adding another', async 
     {
       method: 'GET',
       match: /\/issues\/31\/comments/,
-      body: [{ id: 88, body: '<!-- go-covergrid:grid-map -->\nstale' }],
+      body: [{ id: 88, body: '<!-- js-covergrid:grid-map -->\nstale' }],
     },
     { method: 'PATCH', match: /\/issues\/comments\/88/, body: { id: 88 } },
   ])
@@ -337,9 +334,7 @@ test('a second run edits the existing comment instead of adding another', async 
         GITHUB_API_URL: api.url,
         GITHUB_EVENT_NAME: 'pull_request',
         GITHUB_EVENT_PATH: eventFile(ws.dir, { pull_request: { number: 31 } }),
-        COVERAGE_OUTCOME: 'success',
         HAS_BASELINE: 'false',
-        DIFF_THRESHOLD: '-1',
         CURRENT_BREAKDOWN_PATH: path.join(FIXTURES, 'sample-breakdown.txt'),
         IMAGE_URL: '',
       },
@@ -369,16 +364,15 @@ test('a missing breakdown file still gets a comment, saying coverage could not b
         GITHUB_API_URL: api.url,
         GITHUB_EVENT_NAME: 'pull_request',
         GITHUB_EVENT_PATH: eventFile(ws.dir, { pull_request: { number: 5 } }),
-        COVERAGE_OUTCOME: 'failure',
+        SUMMARY_PATH: 'coverage/coverage-summary.json',
         HAS_BASELINE: 'false',
-        DIFF_THRESHOLD: '-1',
         CURRENT_BREAKDOWN_PATH: path.join(ws.dir, 'nope.txt'),
         IMAGE_URL: '',
       },
       ws.dir,
     )
     assert.match(log, /::warning::No breakdown file at/)
-    assert.match(JSON.parse(api.requests[1].body).body, /could not be read/)
+    assert.match(JSON.parse(api.requests[1].body).body, /could not be read.*`coverage\/coverage-summary\.json`/)
   } finally {
     await api.close()
     ws.cleanup()
@@ -429,9 +423,7 @@ test('the full comparison path renders a diff summary from two breakdown files',
         GITHUB_API_URL: api.url,
         GITHUB_EVENT_NAME: 'pull_request',
         GITHUB_EVENT_PATH: eventFile(ws.dir, { pull_request: { number: 9 } }),
-        COVERAGE_OUTCOME: 'success',
         HAS_BASELINE: 'true',
-        DIFF_THRESHOLD: '-1',
         BASE_BRANCH: 'main',
         CURRENT_BREAKDOWN_PATH: path.join(FIXTURES, 'sample-breakdown.txt'),
         BASE_BREAKDOWN_PATH: baseline,

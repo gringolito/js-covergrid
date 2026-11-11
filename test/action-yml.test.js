@@ -106,7 +106,7 @@ test('no node script is invoked by a relative path', () => {
 // Third-party actions must be pinned to a full commit SHA, not a moving tag.
 test('every third-party action is pinned to a 40-character SHA', () => {
   const uses = [...TEXT.matchAll(/^\s*uses: (\S+)/gm)].map((m) => m[1])
-  assert.ok(uses.length >= 2)
+  assert.ok(uses.length >= 1)
   for (const ref of uses) {
     assert.match(ref, /@[0-9a-f]{40}$/, `${ref} is not pinned to a commit SHA`)
   }
@@ -130,7 +130,7 @@ function inputBlock(name) {
   return next === -1 ? rest : rest.slice(0, next)
 }
 
-// Optional, so the gate and the comment still work for anyone who has not created a token yet.
+// Optional, so the comment still works for anyone who has not created a token yet.
 test('the attachment token is optional and defaults to nothing', () => {
   const block = inputBlock('attachment-token')
   assert.match(block, /required: false/)
@@ -147,7 +147,7 @@ test('the attachment token reaches the publish script through the environment, n
   assert.ok(!runLine.includes('attachment-token'), 'an argument would be echoed in the job log')
 })
 
-// A push to the base branch runs the gate and the renderer, and has no comment to put the
+// A push to the base branch runs the converter and the renderer, and has no comment to put the
 // picture in, so uploading and posting are both gated on the run carrying a pull request. The
 // set of events has to stay the one src/pr-context.js recognises.
 test('the run decides once whether it has a pull request', () => {
@@ -174,14 +174,8 @@ test('publishing and commenting both wait on that answer', () => {
   assert.match(publish.join('\n'), /inputs\.attachment-token != ''/, 'no token means no upload attempt')
 })
 
-test('the gate step tolerates failure so the comment is still posted', () => {
-  const gate = steps().find((b) => b.includes('id: gate'))
-  assert.ok(gate, 'no step with id: gate')
-  assert.ok(gate.includes('continue-on-error: true'), 'the gate must not abort the remaining steps')
-})
-
 // A miswired baseline loses the comparison silently: every degraded path is only a warning.
-test('the fetched baseline reaches the gate and the comment, and only when it was fetched', () => {
+test('the fetched baseline reaches the comment, and only when it was fetched', () => {
   const block = (predicate, label) => {
     const found = steps().find(predicate)
     assert.ok(found, `no step ${label}`)
@@ -200,8 +194,6 @@ test('the fetched baseline reaches the gate and the comment, and only when it wa
   }
   const upload = block((b) => b.some((l) => l.startsWith('uses: actions/upload-artifact@')), 'uploading an artifact')
   assert.ok(upload.includes('  name: ${{ inputs.breakdown-artifact }}'), 'the upload and the fetch disagree on the name')
-
-  assert.ok(byId('gate').includes('  diff-base-breakdown-file-name: ${{ steps.baseline.outputs.path }}'))
 
   const comment = block((b) => b[0] === 'name: Post the pull request comment', 'posting the comment')
   assert.ok(comment.includes("  HAS_BASELINE: ${{ steps.baseline.outputs.path != '' }}"))

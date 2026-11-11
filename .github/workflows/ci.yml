@@ -37,14 +37,19 @@ jobs:
           node-version: '24'
 
       # docs/example-grid-map.svg is what the README shows, and it is a build product of the
-      # renderer over a committed fixture. Rendering is deterministic, so a rendered copy that
-      # differs from the committed one means the picture in the README is stale.
+      # converter and the renderer over a committed fixture: real Vitest output from vueuse,
+      # with its checkout moved to a runner path. Rendering is deterministic, so a rendered copy
+      # that differs from the committed one means the picture in the README is stale.
       - name: Re-render the example grid map
-        run: node src/render-gridmap.js test/fixtures/sample-breakdown.txt "$RUNNER_TEMP/example-grid-map.svg"
+        # GITHUB_* variables can't be set through `env:`, so the workspace is set on the command.
+        run: |
+          GITHUB_WORKSPACE=/home/runner/work/vueuse/vueuse \
+            node src/convert-summary.js test/fixtures/coverage-summary.json "$RUNNER_TEMP/example-breakdown.txt"
+          PACKAGE_DEPTH=1 node src/render-gridmap.js "$RUNNER_TEMP/example-breakdown.txt" "$RUNNER_TEMP/example-grid-map.svg"
 
       - name: Check the committed copy is current
         run: |
           if ! diff -u docs/example-grid-map.svg "$RUNNER_TEMP/example-grid-map.svg"; then
-            echo "::error file=docs/example-grid-map.svg::The example grid map is stale. Regenerate it with: node src/render-gridmap.js test/fixtures/sample-breakdown.txt docs/example-grid-map.svg"
+            echo "::error file=docs/example-grid-map.svg::The example grid map is stale. Regenerate it with the commands in the step above, writing to docs/example-grid-map.svg."
             exit 1
           fi

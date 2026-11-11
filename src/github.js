@@ -28,7 +28,7 @@ function createClient({ token, repository, apiUrl = 'https://api.github.com', fe
       accept: 'application/vnd.github+json',
       authorization: `Bearer ${token}`,
       'x-github-api-version': API_VERSION,
-      'user-agent': 'go-covergrid',
+      'user-agent': 'js-covergrid',
     }
     const init = { method, headers }
     if (body !== undefined) {
@@ -114,7 +114,7 @@ function createClient({ token, repository, apiUrl = 'https://api.github.com', fe
     const headers = {
       authorization: `Bearer ${token}`,
       'x-github-api-version': API_VERSION,
-      'user-agent': 'go-covergrid',
+      'user-agent': 'js-covergrid',
     }
 
     let response = await fetchImpl(url, { method: 'GET', headers, redirect: 'manual' })
@@ -126,7 +126,7 @@ function createClient({ token, repository, apiUrl = 'https://api.github.com', fe
       storageHost = storage.host
       response = await fetchImpl(storage.href, {
         method: 'GET',
-        headers: { 'user-agent': 'go-covergrid' },
+        headers: { 'user-agent': 'js-covergrid' },
       })
     }
 

@@ -35,8 +35,8 @@ test('every shipped file the GHES action invokes exists relative to ghes/', () =
 
 test('an action.yml that still downloads artifacts cannot be turned into a GHES action', () => {
   const withDownload = SOURCE_TEXT.replace(
-    '    - name: Run the coverage gate',
-    '    - uses: actions/download-artifact@0000000000000000000000000000000000000000 # v8\n    - name: Run the coverage gate',
+    '    - name: Convert the coverage summary',
+    '    - uses: actions/download-artifact@0000000000000000000000000000000000000000 # v8\n    - name: Convert the coverage summary',
   )
   assert.throws(() => ghesAction(withDownload), /download-artifact never/)
 })

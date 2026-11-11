@@ -23,7 +23,7 @@ const ARTIFACT_ACTION = /^(\s*(?:-\s+)?)uses: actions\/(upload|download)-artifac
 
 const HEADER = [
   '# GENERATED from action.yml by scripts/build-ghes-action.js. Do not edit by hand.',
-  '# The GitHub Enterprise Server variant of go-covergrid (ADR-0007).',
+  '# The GitHub Enterprise Server variant of js-covergrid (ADR-0007).',
   '',
 ].join('\n')
 

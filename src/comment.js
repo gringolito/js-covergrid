@@ -3,13 +3,8 @@
 // Renders the pull request comment body. Pure string building: no GitHub API calls, no
 // filesystem, no network. The whole comment can be diffed in tests.
 //
-// Counts are Statements, never lines: that is what the go toolchain measures, and
-// CONTEXT.md bans the word.
-//
-// The Gate's inline annotations already report absolute-threshold violations on the Files
-// changed tab, so this does not re-derive its three-way file/package/total verdict. The one
-// failure with no annotation equivalent is the diff-vs-baseline threshold. There is no line
-// to annotate, so that case is named explicitly, with numbers.
+// Counts are Statements, as the coverage tool counts them, and CONTEXT.md bans "line".
+// There is no verdict here: thresholds belong to the test tool.
 
 const {
   aggregateByPackage,
@@ -22,8 +17,8 @@ const {
   round2,
 } = require('./breakdown.js')
 
-const MARKER = '<!-- go-covergrid:grid-map -->'
-const HEADING = '## [go-covergrid](https://github.com/gringolito/go-covergrid): Coverage Report'
+const MARKER = '<!-- js-covergrid:grid-map -->'
+const HEADING = '## [js-covergrid](https://github.com/gringolito/js-covergrid): Coverage Report'
 const BAR_WIDTH = 10
 
 function bar(ratio) {
@@ -88,8 +83,7 @@ function summaryTotals(list) {
  * prefixed `+ ` and `- `.
  *
  * No Partials row: a Breakdown File carries per-file Statement totals and nothing about
- * partial lines or branches, which `go tool cover` does not track either. Faking one would
- * mean parsing a Coverage Profile, the second data path ADR-0001 forbids.
+ * partial lines or branches.
  */
 function renderDiffSummary({ current, base, prNumber, baseBranch }) {
   const cur = summaryTotals(current)
@@ -164,28 +158,6 @@ function renderDiffSummary({ current, base, prNumber, baseBranch }) {
   return lines.join('\n')
 }
 
-function gateStatusLine({ outcome, diffThreshold, hasBaseline, totalDiff, baseBranch }) {
-  const isLikelyDiffFailure =
-    outcome === 'failure' &&
-    hasBaseline &&
-    Number.isFinite(diffThreshold) &&
-    totalDiff !== null &&
-    totalDiff < diffThreshold
-
-  if (isLikelyDiffFailure) {
-    return (
-      `❌ **Coverage dropped ${Math.abs(totalDiff).toFixed(2)}% vs ${baseBranch}** ` +
-      `(min allowed: ${diffThreshold.toFixed(2)}%)`
-    )
-  }
-
-  if (outcome === 'failure') {
-    return '❌ **Coverage gate failed**. See inline annotations on the Files changed tab for details.'
-  }
-
-  return '✅ **Coverage gate passed**'
-}
-
 /**
  * The Grid Map, or an explanation of its absence, so a missing picture is a sentence rather
  * than a silent gap.
@@ -200,8 +172,6 @@ function gridMapSection(imageUrl) {
 
 /**
  * @param {object} args
- * @param {string} args.outcome the Coverage Gate step outcome, 'success' or 'failure'
- * @param {number} args.diffThreshold minimum allowed total change, in percentage points
  * @param {boolean} args.hasBaseline whether a Baseline Breakdown File was retrieved
  * @param {string} args.baseBranch
  * @param {import('./breakdown.js').Stat[]} args.current
@@ -212,8 +182,6 @@ function gridMapSection(imageUrl) {
  * @returns {string} markdown
  */
 function renderComment({
-  outcome,
-  diffThreshold,
   hasBaseline,
   baseBranch = 'main',
   current,
@@ -236,8 +204,6 @@ function renderComment({
   const sections = [
     MARKER,
     HEADING,
-    '',
-    gateStatusLine({ outcome, diffThreshold, hasBaseline, totalDiff, baseBranch }),
     '',
     `**Total coverage:** ${bar(totalPct)} ${round1(totalPct).toFixed(1)}%` +
       (totalDiff === null ? '' : ` (${formatSignedPct(totalDiff, 2)} vs ${baseBranch})`),
@@ -276,22 +242,23 @@ function renderComment({
 }
 
 /**
- * Posted when the Breakdown File is missing, so the comment does not vanish on
- * the one run where something went wrong.
+ * Posted when there is no Breakdown File, so the comment does not vanish on the one run
+ * where something went wrong.
  *
- * @param {string} [breakdownPath]
+ * @param {string} [summaryPath] the Coverage Summary the converter could not read
  * @returns {string} markdown
  */
-function renderUnavailableComment(breakdownPath) {
+function renderUnavailableComment(summaryPath) {
   return (
     [
       MARKER,
       HEADING,
       '',
       '⚠️ **Coverage data could not be read for this run.**' +
-        (breakdownPath ? ` No breakdown file at \`${breakdownPath}\`.` : ''),
+        (summaryPath ? ` No usable coverage summary at \`${summaryPath}\`.` : ''),
       '',
-      'Check this job\'s log: the coverage gate step may have failed before writing its breakdown file.',
+      'A failing test run writes no summary unless the coverage tool is told to. With Vitest, set ' +
+        '`coverage.reportOnFailure: true` and include `json-summary` in `coverage.reporter`.',
     ].join('\n') + '\n'
   )
 }

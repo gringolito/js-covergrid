@@ -1,9 +1,9 @@
 # GENERATED from action.yml by scripts/build-ghes-action.js. Do not edit by hand.
-# The GitHub Enterprise Server variant of go-covergrid (ADR-0007).
-name: go-covergrid-ghes
+# The GitHub Enterprise Server variant of js-covergrid (ADR-0007).
+name: js-covergrid-ghes
 description: >-
-  Go coverage in one PR comment, drawn as a grid map: tiles sized by statements, coloured by
-  coverage.
+  JavaScript coverage in one PR comment, drawn as a grid map: tiles sized by statements,
+  coloured by coverage.
 author: gringolito
 
 branding:
@@ -11,14 +11,12 @@ branding:
   color: green
 
 inputs:
-  profile:
-    description: Path to the coverage profile from `go test -coverprofile`.
+  coverage-summary:
+    description: >-
+      Path to the Istanbul json-summary file your test tool writes, e.g. Vitest with
+      `coverage.reporter` including 'json-summary'.
     required: true
-    default: cover.out
-  config:
-    description: Path to the go-test-coverage config file, e.g. ./.testcoverage.yml.
-    required: false
-    default: ''
+    default: coverage/coverage-summary.json
   github-token:
     description: >-
       Token used to look up the baseline run, download its artifact and post the comment.
@@ -35,12 +33,6 @@ inputs:
       run. Changing it orphans every existing baseline.
     required: false
     default: coverage-breakdown
-  diff-threshold:
-    description: >-
-      Minimum allowed change in total coverage against the baseline, in percentage points.
-      Passed to the gate and quoted in the comment when the gate fails. -101 disables it.
-    required: false
-    default: '-101'
   attachment-token:
     description: >-
       Optional. Personal access token for uploading the Grid Map image. Fine-grained: scoped to
@@ -56,10 +48,6 @@ inputs:
       every folder as its own package.
     required: false
     default: '0'
-  fail-on-gate:
-    description: Fail the job when the coverage gate fails. The comment is posted either way.
-    required: false
-    default: 'true'
 
 outputs:
   total-coverage:
@@ -80,9 +68,6 @@ outputs:
   grid-map-url:
     description: Uploaded Grid Map URL, empty when no attachment-token is set or the upload failed.
     value: ${{ steps.publish.outputs.url }}
-  gate-outcome:
-    description: '"success" or "failure" from the coverage gate step.'
-    value: ${{ steps.gate.outcome }}
 
 runs:
   using: composite
@@ -96,7 +81,7 @@ runs:
           github.event.issue.pull_request != null) && 'true' || 'false' }}
       run: |
         set -euo pipefail
-        work="${RUNNER_TEMP}/go-covergrid"
+        work="${RUNNER_TEMP}/js-covergrid"
         mkdir -p "${work}"
         {
           echo "work=${work}"
@@ -116,16 +101,12 @@ runs:
         BASELINE_PATH: ${{ steps.prepare.outputs.baseline-breakdown }}
       run: node "${GITHUB_ACTION_PATH}/../src/fetch-baseline.js"
 
-    - name: Run the coverage gate
-      id: gate
-      continue-on-error: true
-      uses: vladopajic/go-test-coverage@6890500b00a7e5862e54662c04ea9fa7c799ce1e # v2.23.0
-      with:
-        config: ${{ inputs.config }}
-        profile: ${{ inputs.profile }}
-        breakdown-file-name: ${{ steps.prepare.outputs.breakdown }}
-        diff-base-breakdown-file-name: ${{ steps.baseline.outputs.path }}
-        diff-threshold: ${{ inputs.diff-threshold }}
+    - name: Convert the coverage summary
+      shell: bash
+      env:
+        SUMMARY_PATH: ${{ inputs.coverage-summary }}
+        BREAKDOWN_PATH: ${{ steps.prepare.outputs.breakdown }}
+      run: node "${GITHUB_ACTION_PATH}/../src/convert-summary.js"
 
     - name: Upload the breakdown file for the next run's baseline
       uses: actions/upload-artifact@c24449f33cd45d4826c6702db7e49f7cdb9b551d # v3.2.1-node20
@@ -144,7 +125,7 @@ runs:
       run: |
         set -euo pipefail
         if [[ ! -f "$BREAKDOWN_PATH" ]]; then
-          echo "::warning::The coverage gate wrote no breakdown file; skipping the grid map."
+          echo "::warning::No breakdown file, because the coverage summary could not be read; skipping the grid map."
           exit 0
         fi
         node "${GITHUB_ACTION_PATH}/../src/render-gridmap.js"
@@ -163,19 +144,11 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
-        COVERAGE_OUTCOME: ${{ steps.gate.outcome }}
+        SUMMARY_PATH: ${{ inputs.coverage-summary }}
         HAS_BASELINE: ${{ steps.baseline.outputs.path != '' }}
-        DIFF_THRESHOLD: ${{ inputs.diff-threshold }}
         BASE_BRANCH: ${{ inputs.base-branch }}
         CURRENT_BREAKDOWN_PATH: ${{ steps.prepare.outputs.breakdown }}
         BASE_BREAKDOWN_PATH: ${{ steps.baseline.outputs.path }}
         IMAGE_URL: ${{ steps.publish.outputs.url }}
         PACKAGE_DEPTH: ${{ inputs.package-depth }}
       run: node "${GITHUB_ACTION_PATH}/../src/post-comment.js"
-
-    - name: Fail on a failed gate
-      if: steps.gate.outcome == 'failure' && inputs.fail-on-gate == 'true'
-      shell: bash
-      run: |
-        echo "::error::The coverage gate failed. See the annotations on the Files changed tab."
-        exit 1

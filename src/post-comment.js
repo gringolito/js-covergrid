@@ -23,9 +23,8 @@ async function main() {
     GITHUB_TOKEN,
     GITHUB_REPOSITORY,
     GITHUB_API_URL,
-    COVERAGE_OUTCOME,
+    SUMMARY_PATH,
     HAS_BASELINE,
-    DIFF_THRESHOLD,
     BASE_BRANCH,
     CURRENT_BREAKDOWN_PATH,
     BASE_BREAKDOWN_PATH,
@@ -44,7 +43,7 @@ async function main() {
 
   if (!current) {
     warning(`No breakdown file at "${CURRENT_BREAKDOWN_PATH}"; posting a fallback comment.`)
-    body = renderUnavailableComment(CURRENT_BREAKDOWN_PATH)
+    body = renderUnavailableComment(SUMMARY_PATH)
   } else {
     const hasBaseline = HAS_BASELINE === 'true'
     const base = hasBaseline ? readIfPresent(BASE_BREAKDOWN_PATH) : null
@@ -54,8 +53,6 @@ async function main() {
     }
 
     body = renderComment({
-      outcome: COVERAGE_OUTCOME,
-      diffThreshold: parseFloat(DIFF_THRESHOLD),
       hasBaseline: hasBaseline && Boolean(base),
       baseBranch: BASE_BRANCH || 'main',
       current,
